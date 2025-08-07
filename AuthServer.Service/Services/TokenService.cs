@@ -13,6 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 
 namespace AuthServer.Service.Services
@@ -36,8 +37,9 @@ namespace AuthServer.Service.Services
             return Convert.ToBase64String(numberByte);
         }
         //Aşağıdaki metodum tokenimin Payloadında bulunacak login olmuş kullanıcının bilgilerini tutacağımız claimleri barındıracak
-        private IEnumerable<Claim> GetClaimByUser(AppUser appUser,List<string>audiences)
+        private async Task<IEnumerable<Claim>> GetClaimByUser(AppUser appUser,List<string>audiences)
         {
+            var userRoles = await _userManager.GetRolesAsync(appUser);
             var userClaims = new List<Claim>()
             {
                 //1.claim=>Kullanıcı Id'si bulunduracak
@@ -48,11 +50,15 @@ namespace AuthServer.Service.Services
                 new Claim(JwtRegisteredClaimNames.Email,appUser.Email),
                 //4.claim=>Jwt Id'si için guid oluşturacak
                 new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                new Claim("city",appUser.City),
+                new Claim("BirthDate",appUser.BirthDate.ToShortDateString())
             };
             //Kullanıcıya ait claimsler içerisine birden fazla value değeri ekleyeceğimden dolayı addRange ifadesi kullandım.
             //5.claim=>Aud->audience'den geliyor yani hangi apilerimin url'ine istek atacağım onu ekliyor claim olarak
             //Peki senaryo nasıl olacak=>apilerim tokeni doğrulamaya geçtiği zaman aud içerisinden kendisine gelen bir token olup olmadığını okuyarak isteğe olumlu yanıt verecek.
             userClaims.AddRange(audiences.Select(x => new Claim(JwtRegisteredClaimNames.Aud, x)));
+            //6.claim=>ilgili kullanıcının rollerini claim tarafına eklicem
+            userClaims.AddRange(userRoles.Select(x => new Claim(ClaimTypes.Role, x)));
             return userClaims;
         }
         //Üyelik sistemi gerektirmeyen bir clientta ise claimlerimi aşağıdaki metod ile oluşturcam.
@@ -85,7 +91,7 @@ namespace AuthServer.Service.Services
                  issuer: _customTokenOption.Issuer,
                  expires: accessTokenExpiration,
                  notBefore: DateTime.Now,
-                 claims: GetClaimByUser(appUser, _customTokenOption.Audience),
+                 claims: GetClaimByUser(appUser, _customTokenOption.Audience).Result,
                  signingCredentials: signingCredentials
                 );
             //Tokenimi işleyecek,oluşturucak işlem

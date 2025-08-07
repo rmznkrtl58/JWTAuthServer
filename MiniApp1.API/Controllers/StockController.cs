@@ -8,9 +8,10 @@ namespace MiniApp1.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class StockController : ControllerBase
-    {  
+    {    
         //Controllerimin ismi önemli değil öğrenmek için rastgele isimlendirdik maksat koruma altına alabiliyor muyuz onu kontrol için
-        [Authorize]
+        [Authorize(Roles ="Admin",Policy ="AnkaraPolicy")]//Tokenimin içerisindeki Admin Rolüne sahip ve city'si ankara olanlar erişebilir.
+        [Authorize(Policy ="AgePolicy")]//yaşı 18 den büyükler erişebilir
         [HttpGet]
         public IActionResult GetStockByUser()
         {
