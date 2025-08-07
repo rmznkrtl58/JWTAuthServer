@@ -16,7 +16,7 @@ namespace AuthServer.Core.Repositories
         //Ekleme
         Task CreateAsync(T t);
         //Silme
-        void Delete(int id);
+        void Delete(T t);
         //Güncelleme
         T Update(T t);
        

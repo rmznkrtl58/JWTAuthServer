@@ -1,6 +1,6 @@
 using System;
 
-namespace MiniApp1.API
+namespace WeatherForecast.API
 {
     public class WeatherForecast
     {
