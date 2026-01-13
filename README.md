@@ -1,4 +1,4 @@
-📘 2. ASP.NET Core API + JWT ile Token Bazlı Kimlik Doğrulama:
+📘 ASP.NET Core API + JWT ile Token Bazlı Kimlik Doğrulama:
 
 -JWT (Json Web Token) yapısını tüm detaylarıyla öğrendim.
 
